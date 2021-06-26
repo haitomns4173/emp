@@ -16,7 +16,8 @@ MYSQL* connection;
 short int login_fail = 1;
 int menu_select;
 char retry_key;
-string user_type = "3";
+char user_type[2] = "3";
+int exit_status = 0;
 
 // Use to set the Pointer
 void setPointer(short int xpnt, short int ypnt)
@@ -134,7 +135,9 @@ public:
 		setPointer(92, 21);
 		cout << "12. View Notice";
 		setPointer(92, 23);
-		cout << "13 . Delete Notice";
+		cout << "13. Delete Notice";
+		setPointer(92, 25);
+		cout << "14. Logout";
 		setPointer(60, 39);
 		cout << "Press the number .... ";
 		cin >> menu_select;
@@ -179,6 +182,9 @@ public:
             break;
         case 13:
             notice_delete();
+            break;
+        case 14:
+            logout();
             break;
 		default:
 			setPointer(60, 42);
@@ -242,14 +248,14 @@ public:
                 top_printing();
                 setPointer(60, 17);
                 cout << "Query Result";
-                setPointer(60, 20);
-                cout << "ID   |Name\t\t|Age\t|Post Code\t|Phone";
-                setPointer(60, 21);
-                cout << "--------------------------------------------------";
+                setPointer(30, 20);
+                cout << "ID" << setw(40) << "Name" << setw(20) << "Age" << setw(20) << "Post Code" << setw(20) << "Phone";
+                setPointer(30, 21);
+                cout << "------------------------------------------------------------------------------------------------------";
                 while((adminMain.row = mysql_fetch_row(adminMain.res)))
                 {
-                    setPointer(60,table_y++);
-                    cout << adminMain.row[0] << "    |" << adminMain.row[1] << "\t|" << adminMain.row[2] << "\t|" << adminMain.row[3] << "\t\t|" << adminMain.row[4] << "\n";
+                    setPointer(30,table_y++);
+                    cout <<adminMain.row[0]<< setw(40) <<adminMain.row[1]<< setw(20) <<adminMain.row[2]<< setw(20) <<adminMain.row[3] << setw(20) << adminMain.row[4];
                 }
             }
         }
@@ -258,7 +264,7 @@ public:
             setPointer(60, 29);
             cout << "Employee Name : ";
             fflush(stdin);
-            cin >> search_name;
+            getline(cin, search_name);
 
             stringstream query_holder;
             query_holder << "select * from employee where name = '"<<search_name<<"'";
@@ -268,7 +274,7 @@ public:
             adminMain.query_select(final_query);
             rows_in_employee = mysql_num_rows(adminMain.res);
 
-            if(rows_in_employee==0)
+            if(rows_in_employee == 0)
             {
                 setPointer(60, 32);
                 cout << "No Record Found";
@@ -278,14 +284,14 @@ public:
                 top_printing();
                 setPointer(60, 17);
                 cout << "Query Result";
-                setPointer(60, 20);
-                cout << "ID   |Name\t\t|Age\t|Post Code\t|Phone";
-                setPointer(60, 21);
-                cout << "--------------------------------------------------";
+                setPointer(30, 20);
+                cout << "ID" << setw(40) << "Name" << setw(20) << "Age" << setw(20) << "Post Code" << setw(20) << "Phone";
+                setPointer(30, 21);
+                cout << "------------------------------------------------------------------------------------------------------";
                 while((adminMain.row = mysql_fetch_row(adminMain.res)))
                 {
-                    setPointer(60,table_y++);
-                    cout << adminMain.row[0] << "    |" << adminMain.row[1] << "\t|" << adminMain.row[2] << "\t|" << adminMain.row[3] << "\t\t|" << adminMain.row[4] << "\n";
+                    setPointer(30,table_y++);
+                    cout <<adminMain.row[0]<< setw(40) <<adminMain.row[1]<< setw(20) <<adminMain.row[2]<< setw(20) <<adminMain.row[3] << setw(20) << adminMain.row[4];
                 }
             }
         }
@@ -839,7 +845,7 @@ retry_credentials:
 		cin >> advance_salary_amount;
 
 		stringstream query_holder;
-        query_holder << "SELECT * FROM `employee` WHERE `name` LIKE '"<<employee_name<<"'";
+        query_holder << "SELECT * FROM `employee` WHERE `name` = '"<<employee_name<<"'";
         string temp_query = query_holder.str();
         const char* final_query = temp_query.c_str();
 
@@ -869,7 +875,7 @@ retry_credentials:
         else
         {
             stringstream query_holder2;
-            query_holder2 << "INSERT INTO `advance_salary`(`id`, `amount`, `employee_id`) VALUES ('NULL','"<<advance_salary_amount<<"','"<<temp_employee_id<<"";
+            query_holder2 << "UPDATE `salary` SET `advance_salary`='"<< advance_salary_amount <<"' WHERE emp_id = "<< temp_employee_id <<"";
             string temp_query2 = query_holder2.str();
             const char* final_query2 = temp_query2.c_str();
 
@@ -1059,7 +1065,50 @@ retry_credentials:
 
     void view_salary()
     {
-        _getch();
+        int search_id = 0, rows_in_salary = 0, table_y = 22;
+        float total_salary, temp_salary[7];
+
+        top_printing();
+		setPointer(60, 17);
+		cout << "View Salary";
+        setPointer(60, 19);
+        cout << "Employee ID : ";
+        fflush(stdin);
+        cin >> search_id;
+
+        stringstream query_holder;
+        query_holder << "select * from salary where emp_id = "<<search_id<<"";
+        string temp_query = query_holder.str();
+        const char* final_query = temp_query.c_str();
+
+        adminMain.query_select(final_query);
+        rows_in_salary = mysql_num_rows(adminMain.res);
+
+        if(rows_in_salary == 0)
+        {
+            setPointer(60, 32);
+            cout << "No Record Found";
+        }
+        else
+        {
+            top_printing();
+            setPointer(60, 17);
+            cout << "Query Result";
+            setPointer(25, 20);
+            cout << "ID" << setw(30) << "PF" << setw(15) << "AS" << setw(15) << "SD" << setw(15) << "Rent" << setw(15) << "Travel" << setw(15) << "Salary" << setw(15) <<"Total";
+            setPointer(25, 21);
+                cout << "--------------------------------------------------------------------------------------------------------------------------";
+            while((adminMain.row = mysql_fetch_row(adminMain.res)))
+            {
+                for (int salary_covn = 2; salary_covn <= 7; salary_covn++)
+                {
+                    temp_salary[salary_covn] = stof(adminMain.row[salary_covn]);
+                }
+                total_salary = (temp_salary[5] + temp_salary[6] + temp_salary[7]) - (temp_salary[2] + temp_salary[3] + temp_salary[4]);
+                setPointer(25,table_y++);
+                cout <<adminMain.row[1]<< setw(30) <<adminMain.row[2]<< setw(15) <<adminMain.row[3]<< setw(15) <<adminMain.row[4] << setw(15) << adminMain.row[5] << setw(15) << adminMain.row[6] << setw(15) << adminMain.row[7] << setw(15) << total_salary;
+            }
+        }
     }
 
     void view_work()
@@ -1178,6 +1227,11 @@ retry_credentials:
             cout << "Deletation Failed!!";
         }
     }
+
+    void logout()
+    {
+        exit_status = 1;
+    }
 };
 
 class Manager: public Admin
@@ -1208,7 +1262,9 @@ public:
 		cout << "8. Advance Salary";
         setPointer(60, 35);
 		cout << "9. Notice";
-		setPointer(60, 39);
+		setPointer(60, 37);
+		cout << "10. Logout";
+		setPointer(60, 41);
 		cout << "Press the number .... ";
 		cin >> menu_select;
 		fflush(stdin);
@@ -1241,6 +1297,9 @@ public:
         case 9:
             notice();
 			break;
+        case 10:
+            logout();
+            break;
 		default:
 			setPointer(60, 42);
 			cout << "Wrong Input!";
@@ -1280,7 +1339,9 @@ public:
 		cout << "4. Advance Salary";
 		setPointer(60, 27);
 		cout << "5. Notice";
-		setPointer(60, 39);
+		setPointer(60, 29);
+		cout << "6. Logout";
+		setPointer(60, 41);
 		cout << "Press the number .... ";
 		cin >> menu_select;
 		fflush(stdin);
@@ -1301,6 +1362,9 @@ public:
 		case 5:
 		    view_notice();
 			break;
+        case 6:
+            logout();
+            break;
 		default:
 			setPointer(60, 42);
 			cout << "Wrong Input!";
@@ -1360,7 +1424,7 @@ public:
 		// Check if the user is valid or not
 		if (strcmp(admin_username, username) == 0 && strcmp(admin_password, password) == 0)
 		{
-		    user_type = "0";
+		    strcpy(user_type, "0");
 			setPointer(60, 25);
 			cout << "Success!";
 			setPointer(60, 28);
@@ -1379,13 +1443,13 @@ public:
 
 			if(strcmp("1", loginValidate.row[3]) == 0)
             {
-                user_type = loginValidate.row[3];
+                strcpy(user_type, loginValidate.row[3]);
                 Manager managerMain;
                 managerMain.manager_panel();
             }
             else
             {
-                user_type = loginValidate.row[3];
+                strcpy(user_type, loginValidate.row[3]);
                 Employee employeeMain;
                 employeeMain.employee_panel();
             }
@@ -1423,6 +1487,9 @@ public:
 int main()
 {
     Mysql connect;
+    Admin redirectAdmin;
+    Manager redirectManager;
+    Employee redirectEmployee;
 
     fullscreen();
     system("COLOR 47");
@@ -1453,6 +1520,39 @@ int main()
     // Now the login page is executed
     Login mainLogin;
     mainLogin.login_input();
+
+    while(exit_status == 0)
+    {
+        setPointer(60, 45);
+        cout << "Hit Esc to exit and Enter to continue to Panel....";
+        retry_key = _getch();
+        if (retry_key == 27)
+        {
+            exit(0);
+        }
+
+        if(strcmp(user_type, "0") == 0)
+        {
+            redirectAdmin.admin_panel();
+        }
+        else if(strcmp(user_type, "1") == 0)
+        {
+            redirectManager.manager_panel();
+        }
+        else
+        {
+            redirectEmployee.employee_panel();
+        }
+    }
+
+    top_printing();
+    setPointer(60, 17);
+    cout << "You have Successfully Logged out!";
+    setPointer(60, 19);
+    cout << "Thanks for using the Program.";
+    setPointer(60, 25);
+    cout << "Exiting.....";
+    Sleep(1500);
 
     mysql_close(connection);
     return 0;
