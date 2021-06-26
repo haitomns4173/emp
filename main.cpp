@@ -1,4 +1,3 @@
-// You need to find a way to manager the select query output
 #include <iostream>
 #include <winsock.h>
 #include <mysql.h>
@@ -1060,7 +1059,95 @@ retry_credentials:
 
     void employee_salary()
     {
-        _getch();
+        string search_name, temp_employee_id;
+        float salary_cut = 0, rent_allowance = 0, travel_allowance = 0;
+        int employee_name_search = 0, salary_result = 0;
+
+    retry_insert_salary:
+        top_printing();
+		setPointer(60, 17);
+		cout << "Make Salary";
+		setPointer(60, 18);
+		cout << "Fill in the Details :";
+
+		setPointer(60, 22);
+		cout << "Employee Name    :";
+		setPointer(60, 24);
+		cout << "Salary Deduction :";
+		setPointer(60, 26);
+		cout << "Rent             :";
+		setPointer(60, 28);
+		cout << "Travel           :";
+		setPointer(79, 22);
+		getline(cin, search_name);
+
+		stringstream query_holder;
+        query_holder << "SELECT * FROM `employee` WHERE `name` = '"<< search_name <<"'";
+        string temp_query = query_holder.str();
+        const char* final_query = temp_query.c_str();
+
+        adminMain.query_select(final_query);
+        adminMain.row = mysql_fetch_row(adminMain.res);
+        employee_name_search = mysql_num_rows(adminMain.res);
+
+        temp_employee_id = adminMain.row[0];
+
+        if(employee_name_search == 0)
+        {
+            setPointer(60, 32);
+            cout << "There is no Employee named " << search_name;
+            setPointer(60, 44);
+			cout << "Hit Enter to re-enter and Esc to exit ....";
+			retry_key = _getch();
+
+			if (retry_key == 27)
+			{
+				exit(0);
+			}
+			else
+			{
+				goto  retry_insert_salary;
+			}
+        }
+        else
+        {
+            setPointer(79, 24);
+            cin >> salary_cut;
+            setPointer(79, 26);
+            cin >> rent_allowance;
+            setPointer(79, 28);
+            cin >> travel_allowance;
+
+            stringstream query_holder2;
+            query_holder2 << "UPDATE `salary` SET `salary_deduction`='"<< salary_cut <<"',`rent`='"<< rent_allowance <<"',`travel`='"<< travel_allowance <<"' WHERE emp_id = "<< temp_employee_id <<"";
+            string temp_query2 = query_holder2.str();
+            const char* final_query2 = temp_query2.c_str();
+
+            salary_result = adminMain.query_executor(final_query2);
+
+            if(salary_result == 1)
+            {
+                setPointer(60, 32);
+                cout << "Salary Updated!!";
+            }
+            else
+            {
+                setPointer(60, 32);
+                cout << "Salary NOT Updated!!";
+                setPointer(60, 44);
+                cout << "Hit Enter to re-enter and Esc to exit ....";
+                retry_key = _getch();
+
+                if (retry_key == 27)
+                {
+                    exit(0);
+                }
+                else
+                {
+                    goto retry_insert_salary;
+                }
+            }
+        }
     }
 
     void view_salary()
