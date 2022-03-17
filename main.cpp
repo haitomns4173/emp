@@ -481,12 +481,15 @@ retry_credentials:
 
             stringstream query_holder4;
             query_holder4 << "SELECT * FROM `employee` WHERE `name` LIKE '"<<emp_name<<"'";
+            //query_holder4 << "SELECT * FROM `employee` ORDER BY id DESC LIMIT 1;";
             string temp_query4 = query_holder4.str();
             const char* final_query4 = temp_query4.c_str();
 
             adminMain.query_select(final_query4);
+            adminMain.row = mysql_fetch_row(adminMain.res);
 
             top_printing();
+            cout << adminMain.row[0];
             setPointer(60, 17);
             cout << "Registration";
             setPointer(60, 19);
@@ -497,6 +500,8 @@ retry_credentials:
             cin >> emp_salary;
 
             pf = 0.1*emp_salary;
+
+            cout << emp_salary << "  " << pf;
 
             stringstream query_holder5;
             query_holder5 << "INSERT INTO `salary`(`id`, `emp_id`, `pf`, `advance_salary`, `salary_deduction`, `rent`, `travel`, `salary`) VALUES ('NULL','"<<adminMain.row[0]<<"','"<<pf<<"','NULL','NULL','NULL','NULL','"<<emp_salary<<"')";
